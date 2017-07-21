@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:paddingBottom="16dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="10dp"
+    android:paddingTop="16dp"
+    android:scrollbarAlwaysDrawHorizontalTrack="true"
+    android:scrollbarAlwaysDrawVerticalTrack="true"
+    tools:context="com.example.patri.mybookdiary.MainActivity">
+
+    <Button
+        android:id="@+id/scan_button"
+        android:layout_width="74dp"
+        android:layout_height="39dp"
+
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/scan" />
+
+    <EditText
+        android:id="@+id/scan_isbn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/scan_button"
+        android:layout_marginTop="14dp"
+        android:editable="true"
+        android:inputType="number"
+        android:text="ISBN"
+        tools:clickable="true" />
+
+    <EditText
+        android:id="@+id/scan_titel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/scan_isbn"
+        android:layout_marginTop="8dp"
+        android:editable="true"
+        android:inputType="text"
+        android:text="Titel"
+        tools:clickable="true" />
+
+    <Button
+        android:id="@+id/neuwishlist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/serieNmb"
+        android:layout_alignLeft="@+id/serieNmb"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/serieNmb"
+        android:layout_alignStart="@+id/serieNmb"
+        android:layout_marginBottom="23dp"
+        android:text="Wishlist" />
+
+    <RatingBar
+        android:id="@+id/ratingBar1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="11dp"
+        android:layout_marginStart="11dp"
+        android:layout_below="@+id/serieTxt"
+        android:layout_alignLeft="@+id/neu_gelesen"
+        android:layout_alignStart="@+id/neu_gelesen"
+        android:layout_marginTop="26dp" />
+
+    <Button
+        android:id="@+id/neu_gelesen"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/neuwishlist"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="Hinzufügen Gelesen" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/neuwishlist"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="568dp"
+        android:layout_marginStart="568dp" />
+
+    <Spinner
+        android:id="@+id/spKategorie"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:drawable/btn_dropdown"
+        android:spinnerMode="dropdown"
+        android:layout_below="@+id/autoren"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="8dp" />
+
+    <CheckBox
+        android:id="@+id/cbSerie"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/spKategorie"
+        android:layout_marginTop="9dp"
+        android:text="Serie?" />
+
+    <EditText
+        android:id="@+id/serieTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/cbSerie"
+        android:layout_alignBottom="@+id/cbSerie"
+        android:layout_marginLeft="50pt"
+        android:layout_marginStart="50pt"
+        android:inputType="text"
+        android:maxWidth="200dp"
+        android:visibility="invisible"
+        android:text="Serie" />
+
+    <EditText
+        android:id="@+id/serieNmb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/serieTxt"
+        android:layout_alignBottom="@+id/serieTxt"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="9dp"
+        android:layout_marginRight="9dp"
+        android:editable="true"
+        android:inputType="number"
+        android:text="Seriennummer"
+        tools:clickable="true" />
+
+    <AutoCompleteTextView
+        android:id="@+id/autoren"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:dropDownWidth="220dp"
+        android:text="Autor"
+        android:layout_below="@+id/scan_titel"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+</RelativeLayout>
