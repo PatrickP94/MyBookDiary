@@ -1,7 +1,10 @@
 package com.example.patri.mybookdiary;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -131,6 +134,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             else{ seriegelesen =0; }
             titel = titelTxt.getText().toString();
             seriennr = serieNmb.getText().toString();
+            if (seriennr.equals("Nummer")){ seriennr = ""; }
+
             float bewert1 = bewertung.getRating() * 2;
             bewert = Math.round(bewert1);
             tableadd = "bücher_gelesen";
@@ -146,10 +151,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             else{ seriegelesen =0; }
             titel = titelTxt.getText().toString();
             seriennr = serieNmb.getText().toString();
+            if (seriennr.equals("Nummer")){ seriennr = ""; }
             float bewert1 = bewertung.getRating() * 2;
             bewert = Math.round(bewert1);
             //autorID = autorTxt.getText().toString();
-            autorID = autorlist.getText().toString();
+            if (autorID ==null){
+                autorID = autorlist.getText().toString();
+            }
+            if (serieID ==null && serieTxt.getText().toString() !="Reihentitel"){
+                serieID = serieTxt.getText().toString();
+            }
+
+
             tableadd = "neue_bücher";
             if (kategorieID ==null){
                 kategorieID = spKategorie.getItemAtPosition(spKategorie.getSelectedItemPosition()).toString();
@@ -166,7 +179,25 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             String scanFormat = scanningResult.getFormatName();
             isbnTxt.setText(scanContent);
             isbn=scanContent;
-            new readDB().execute();
+            String wlan = getWifiName(getApplicationContext());
+            if (wlan.contentEquals("Preiss WLAN")){
+
+            }
+            else {
+                AlertDialog.Builder myAlert2 = new AlertDialog.Builder(MainActivity.this);
+                myAlert2.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                myAlert2.setMessage("keine Verbindung zur Online Datenbank möglich.").create();
+                AlertDialog alert = myAlert2.create();
+
+                alert.show();
+                OnlineBooks ob = new OnlineBooks();
+                ob.OnlineBooks(isbn, autorlist, titelTxt, bewertung);
+            }
         }
         else{
             Toast toast = Toast.makeText(getApplicationContext(),
@@ -263,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                      else if(schongelesen==false){
                         neugelesen.setVisibility(View.VISIBLE);
                          newwishlist.setVisibility(View.VISIBLE);
-                         bewertung.setVisibility(View.INVISIBLE);
+                         bewertung.setVisibility(View.VISIBLE);
                      }
                      else{
                          neugelesen.setVisibility(View.VISIBLE);
@@ -307,31 +338,64 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             String insert,delete;
             insert="";
             //ul.updateLeseliste(isbn,titelTxt.getText().t2oString(),autorID, kategorieID, seriegelesen,serieID, serieNmb.getText().toString(),(int)bewertung.getRating()*2);
-            if (tableadd == "neue_bücher"){
-                rsa = dv.lesen("Select idAutoren, Concat(vorname, nachname) as name from autoren where CONCAT(vorname, ' ', nachname) like = "+autorID);
+            if (serieID.toString().equals("Reihentitel")){
+                serieID = "keine";
+            }
+            else{
+                rsa = dv.lesen("Select serienID from serie where serientitel = '"+serieID+"';");
                 if (rsa == null){
-                    String name[] =  autorID.split(" ");
-                    Integer names = name.length -1;
+                    String serie[] =  serieID.split(" ");
+                    Integer serien = serie.length -1;
                     String vname, nname;
-                    vname= name[0];
-                    nname = name[names];
-                    if (nname.length() > 4){
-                        nname = nname.substring(0,4);
+                    serieID = serie[1];
+                    if (serien==1){
+                        serieID = serieID.substring(1,6);
                     }
-                    if (vname.length() > 3){
-                        vname = vname.substring(1,3);
+                    else {
+                        for (Integer i = 1; i < serien; i++) {
+                            if (serie[i].length() > serieID.length()){
+                                serieID= serie[1];
+                            }
+                        }
+                        if (serieID.length() > 6){serieID=serieID.substring(1,6);}
+
                     }
-                        autorID = nname + vname;
                 }
                 else {
                     try {
                         while (rsa.next()) {
-                            autorID = rsa.getString(1).toString();
+                            serieID = rsa.getString(1).toString();
                         }
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }
+            }
+            rsa = dv.lesen("Select idAutoren, Concat(vorname, nachname) as name from autoren where CONCAT(vorname, ' ', nachname) like '"+autorID+"';");
+            if (rsa == null){
+                String name[] =  autorID.split(" ");
+                Integer names = name.length -1;
+                String vname, nname;
+                vname= name[0];
+                nname = name[names];
+                if (nname.length() > 4){
+                    nname = nname.substring(0,4);
+                }
+                if (vname.length() > 3){
+                    vname = vname.substring(0,3);
+                }
+                autorID = nname + vname;
+            }
+            else {
+                try {
+                    while (rsa.next()) {
+                        autorID = rsa.getString(1).toString();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (tableadd == "neue_bücher"){
                 Log.i("lesen", "Select kategorieID From kategorie Where name = '"+kategorieID+"' or kategorieID ='"+kategorieID+"';");
                 rsa = dv.lesen("Select kategorieID From kategorie Where name = '"+kategorieID+"' or kategorieID ='"+kategorieID+"';");
                 try{
@@ -380,7 +444,14 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         }
 
+    public String getWifiName(Context context) {
+        String ssid = "none";
+        WifiManager wifiManager = (WifiManager) context.getSystemService(WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        ssid = wifiInfo.getSSID();
 
+        return ssid;
+    }
 
 
 }
