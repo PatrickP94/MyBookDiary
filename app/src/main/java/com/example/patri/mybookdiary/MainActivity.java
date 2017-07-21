@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.patri.db.DBVerbindung;
+import com.example.patri.select.GetSerie;
 import com.example.patri.select.OnlineBooks;
 import com.example.patri.select.getAutor;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -31,10 +32,10 @@ import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity implements OnClickListener {
     private String isbn, autorID, kategorieID, serieID, titel,seriennr, tableadd;
-    private AutoCompleteTextView autorlist;
+    private AutoCompleteTextView autorlist, serieTxt;
     private Integer bewert;
     private Button scanBtn, newwishlist,neugelesen;
-    private TextView isbnTxt, titelTxt, serieTxt, serieNmb;
+    private TextView isbnTxt, titelTxt, serieNmb;
     private CheckBox cbSerie;
     private RatingBar bewertung;
     DBVerbindung dv;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         neugelesen = (Button)findViewById(R.id.neu_gelesen);
         neugelesen.setOnClickListener(this);
         spKategorie = (Spinner)findViewById(R.id.spKategorie);
-        ArrayList autor;
+        ArrayList autor,serielist;
         cbSerie = (CheckBox) findViewById(R.id.cbSerie);
         cbSerie.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -65,14 +66,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 if (cbSerie.isChecked())
                 {
                    serieTxt.setVisibility(View.VISIBLE);
+                   serieNmb.setVisibility(View.VISIBLE);
                 }
                 else
                 {
                     serieTxt.setVisibility(View.INVISIBLE);
+                    serieNmb.setVisibility(View.INVISIBLE);
                 }
             }
         });
-        serieTxt = (TextView)findViewById(R.id.serieTxt);
         serieNmb = (TextView)findViewById(R.id.serieNmb);
         bewertung =(RatingBar)findViewById(R.id.ratingBar1);
         autorlist =(AutoCompleteTextView)findViewById(R.id.autoren);
@@ -90,6 +92,23 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         ArrayAdapter<String> adapterAutor = new ArrayAdapter<String>(this,
                 android.R.layout.simple_dropdown_item_1line,autor);
         autorlist.setAdapter(adapterAutor);
+        serieTxt = (AutoCompleteTextView)findViewById(R.id.serienreihe);
+        GetSerie gS = new GetSerie();
+        try {
+            serielist = gS.serienlistAbrufen();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            serielist=null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            serielist=null;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            serielist=null;
+        }
+        ArrayAdapter<String> adapterserie = new ArrayAdapter<String>(this,
+                android.R.layout.simple_dropdown_item_1line,serielist);
+        serieTxt.setAdapter(adapterserie);
 
         Spinner dropdown = (Spinner)findViewById(R.id.spKategorie);
         String[] items = new String[]{"","Biografie", "Komödie", "Comic","Esoterik","Fantasy","Fiction Mashup", "Gegenwartsliteratur", "Historische Romane", "Jugendromane/Schullektüre", "Kriminalroman", "Liebesromane", "Politik", "Psychothriller", "Science Fiction","Thriller"};

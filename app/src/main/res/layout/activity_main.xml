@@ -54,10 +54,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/serieNmb"
-        android:layout_alignLeft="@+id/serieNmb"
         android:layout_alignParentBottom="true"
         android:layout_alignRight="@+id/serieNmb"
-        android:layout_alignStart="@+id/serieNmb"
         android:layout_marginBottom="23dp"
         android:text="Wishlist" />
 
@@ -65,12 +63,13 @@
         android:id="@+id/ratingBar1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/serienreihe"
         android:layout_marginLeft="11dp"
         android:layout_marginStart="11dp"
-        android:layout_below="@+id/serieTxt"
-        android:layout_alignLeft="@+id/neu_gelesen"
-        android:layout_alignStart="@+id/neu_gelesen"
-        android:layout_marginTop="26dp" />
+        android:layout_marginTop="24dp"
+        android:isIndicator="false" />
 
     <Button
         android:id="@+id/neu_gelesen"
@@ -106,39 +105,39 @@
         android:id="@+id/cbSerie"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
+        android:layout_marginTop="14dp"
+        android:text="Serie?"
         android:layout_below="@+id/spKategorie"
-        android:layout_marginTop="9dp"
-        android:text="Serie?" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
-    <EditText
+<!--    <EditText
         android:id="@+id/serieTxt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/cbSerie"
-        android:layout_alignBottom="@+id/cbSerie"
-        android:layout_marginLeft="50pt"
-        android:layout_marginStart="50pt"
-        android:inputType="text"
+        android:inputType="text|textAutoComplete"
         android:maxWidth="200dp"
+        android:text="Serie"
         android:visibility="invisible"
-        android:text="Serie" />
+        android:layout_alignBottom="@+id/cbSerie"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp" />-->
 
     <EditText
         android:id="@+id/serieNmb"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/serieTxt"
-        android:layout_alignBottom="@+id/serieTxt"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginEnd="9dp"
-        android:layout_marginRight="9dp"
         android:editable="true"
         android:inputType="number"
-        android:text="Seriennummer"
-        tools:clickable="true" />
+        android:text="Nummer"
+        tools:clickable="true"
+        android:layout_marginRight="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_alignBaseline="@+id/serienreihe"
+        android:layout_alignBottom="@+id/serienreihe"
+        android:layout_alignParentRight="true"
+        android:visibility="invisible"
+        android:layout_alignParentEnd="true" />
 
     <AutoCompleteTextView
         android:id="@+id/autoren"
@@ -150,5 +149,40 @@
         android:layout_below="@+id/scan_titel"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
+    <AutoCompleteTextView
+        android:id="@+id/autoCompleteTextView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/scan_titel"
+        android:layout_marginTop="10dp"
+        android:dropDownWidth="220dp"
+        android:text="Autor" />
+
+    <AutoCompleteTextView
+        android:id="@+id/autor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/scan_titel"
+        android:layout_marginTop="10dp"
+        android:dropDownWidth="220dp"
+        android:text="Autor" />
+
+    <AutoCompleteTextView
+        android:id="@+id/serienreihe"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/spKategorie"
+        android:layout_marginLeft="100dp"
+        android:layout_marginTop="10dp"
+        android:dropDownWidth="220dp"
+        android:text="Reihentitel"
+        android:visibility="invisible" />
 
 </RelativeLayout>
