@@ -63,7 +63,10 @@ public class OnlineBooks {
             }
             else {
                 Element autor = result.select("tr.menuElem").first();
-                autorTxt.setText(autor.select("div.author").first().text().toString().replace("by ", ""));
+                String autorname =autor.select("div.author").first().text().toString().replace("by ", "");
+                if (autorname.indexOf(";")>0){
+                    autorTxt.setText(autorname.substring(0,autorname.indexOf(";")));
+                }
                 String titel = result.select("tr.menuElem").first().text().toString();
                 Integer i = titel.indexOf("1. ");
                 Integer j = titel.indexOf(" 1. ");

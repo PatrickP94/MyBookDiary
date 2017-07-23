@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private CheckBox cbSerie;
     private RatingBar bewertung;
     DBVerbindung dv;
-    Boolean schongelesen;
+    Boolean schongelesen, verbindungOk =false;
     ResultSet testText;
     Spinner spKategorie;
     Integer seriegelesen;
@@ -80,39 +80,60 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         });
         serieNmb = (TextView)findViewById(R.id.serieNmb);
         bewertung =(RatingBar)findViewById(R.id.ratingBar1);
-        autorlist =(AutoCompleteTextView)findViewById(R.id.autoren);
-        getAutor autorenliste = new getAutor();
-        autor=null;
-        try {
-            autor = autorenliste.autorenlisteAbrufen();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+        String wlan = getWifiName(getApplicationContext());
+        if (wlan.contains("Preiss WLAN")){
+            verbindungOk = true;
         }
-        ArrayAdapter<String> adapterAutor = new ArrayAdapter<String>(this,
-                android.R.layout.simple_dropdown_item_1line,autor);
-        autorlist.setAdapter(adapterAutor);
-        serieTxt = (AutoCompleteTextView)findViewById(R.id.serienreihe);
-        GetSerie gS = new GetSerie();
-        try {
-            serielist = gS.serienlistAbrufen();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            serielist=null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            serielist=null;
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            serielist=null;
-        }
-        ArrayAdapter<String> adapterserie = new ArrayAdapter<String>(this,
-                android.R.layout.simple_dropdown_item_1line,serielist);
-        serieTxt.setAdapter(adapterserie);
+        else {
+            AlertDialog.Builder myAlert2 = new AlertDialog.Builder(MainActivity.this);
+            myAlert2.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            myAlert2.setMessage("keine Verbindung zur Online Datenbank möglich.").create();
+            AlertDialog alert = myAlert2.create();
 
+            alert.show();
+            OnlineBooks ob = new OnlineBooks();
+            ob.OnlineBooks(isbn, autorlist, titelTxt, bewertung);
+        }
+        autorlist =(AutoCompleteTextView)findViewById(R.id.autoren);
+        if (verbindungOk) {
+            getAutor autorenliste = new getAutor();
+            autor = null;
+            try {
+                autor = autorenliste.autorenlisteAbrufen();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            ArrayAdapter<String> adapterAutor = new ArrayAdapter<String>(this,
+                    android.R.layout.simple_dropdown_item_1line, autor);
+            autorlist.setAdapter(adapterAutor);
+
+            serieTxt = (AutoCompleteTextView) findViewById(R.id.serienreihe);
+            GetSerie gS = new GetSerie();
+            try {
+                serielist = gS.serienlistAbrufen();
+            } catch (SQLException e) {
+                e.printStackTrace();
+                serielist = null;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                serielist = null;
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+                serielist = null;
+            }
+            ArrayAdapter<String> adapterserie = new ArrayAdapter<String>(this,
+                    android.R.layout.simple_dropdown_item_1line, serielist);
+            serieTxt.setAdapter(adapterserie);
+        }
         Spinner dropdown = (Spinner)findViewById(R.id.spKategorie);
         String[] items = new String[]{"","Biografie", "Komödie", "Comic","Esoterik","Fantasy","Fiction Mashup", "Gegenwartsliteratur", "Historische Romane", "Jugendromane/Schullektüre", "Kriminalroman", "Liebesromane", "Politik", "Psychothriller", "Science Fiction","Thriller"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
@@ -179,22 +200,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             String scanFormat = scanningResult.getFormatName();
             isbnTxt.setText(scanContent);
             isbn=scanContent;
-            String wlan = getWifiName(getApplicationContext());
-            if (wlan.contentEquals("Preiss WLAN")){
-
+            if (verbindungOk){
+                new readDB().execute();
             }
-            else {
-                AlertDialog.Builder myAlert2 = new AlertDialog.Builder(MainActivity.this);
-                myAlert2.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                myAlert2.setMessage("keine Verbindung zur Online Datenbank möglich.").create();
-                AlertDialog alert = myAlert2.create();
-
-                alert.show();
+            else{
                 OnlineBooks ob = new OnlineBooks();
                 ob.OnlineBooks(isbn, autorlist, titelTxt, bewertung);
             }
@@ -335,66 +344,91 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             rsa = null;
             DBVerbindung dv = new DBVerbindung();
             dv.oeffneDB();
+            String vname="", nname="",vorname="", nachname="";
+            String serientitel;
             String insert,delete;
             insert="";
+            serientitel = serieID;
             //ul.updateLeseliste(isbn,titelTxt.getText().t2oString(),autorID, kategorieID, seriegelesen,serieID, serieNmb.getText().toString(),(int)bewertung.getRating()*2);
             if (serieID.toString().equals("Reihentitel")){
                 serieID = "keine";
+                serientitel = "";
             }
             else{
                 rsa = dv.lesen("Select serienID from serie where serientitel = '"+serieID+"';");
-                if (rsa == null){
-                    String serie[] =  serieID.split(" ");
-                    Integer serien = serie.length -1;
-                    String vname, nname;
-                    serieID = serie[1];
-                    if (serien==1){
-                        serieID = serieID.substring(1,6);
-                    }
-                    else {
-                        for (Integer i = 1; i < serien; i++) {
-                            if (serie[i].length() > serieID.length()){
-                                serieID= serie[1];
-                            }
+                try {
+                    if (!rsa.next()){
+
+                        String serie[] =  serieID.split(" ");
+                        Integer serien = serie.length -1;
+                        serieID = serie[1];
+                        if (serien==1){
+                            serieID = serieID.substring(1,6);
                         }
-                        if (serieID.length() > 6){serieID=serieID.substring(1,6);}
+                        else {
+                            for (Integer i = 1; i < serien; i++) {
+                                if (serie[i].length() > serieID.length()){
+                                    serieID= serie[1];
+                                }
+                            }
+                            if (serieID.length() > 6){serieID=serieID.substring(1,6);}
+
+                        }
 
                     }
+                    else {
+                        try {
+                            while (rsa.next()) {
+                                serieID = rsa.getString(1).toString();
+                            }
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                if (serieID !="keine") {
+                    dv.aendern("INSERT INTO serie Values ('" + serieID + "','" + serientitel + "','');");
+                }
+            }
+            rsa = dv.lesen("Select idAutoren, Concat(vorname, nachname) as name from autoren where CONCAT(vorname, ' ', nachname) like '"+autorID+"';");
+            try {
+                if (!rsa.next()){
+                    String name[] =  autorID.split(" ");
+                    Integer names = name.length -1;
+                    vorname = name[0];
+                    nachname="";
+                    for (Integer i=1;i <= names;i++){
+                        nachname = nachname+name[1];
+                    }
+                    vname= name[0];
+                    nname = name[names];
+                    if (nname.length() > 4){
+                        nname = nname.substring(0,4);
+                    }
+                    if (vname.length() > 3){
+                        vname = vname.substring(0,3);
+                    }
+                    autorID = nname + vname;
                 }
                 else {
                     try {
                         while (rsa.next()) {
-                            serieID = rsa.getString(1).toString();
+                            autorID = rsa.getString(1).toString();
                         }
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-            rsa = dv.lesen("Select idAutoren, Concat(vorname, nachname) as name from autoren where CONCAT(vorname, ' ', nachname) like '"+autorID+"';");
-            if (rsa == null){
-                String name[] =  autorID.split(" ");
-                Integer names = name.length -1;
-                String vname, nname;
-                vname= name[0];
-                nname = name[names];
-                if (nname.length() > 4){
-                    nname = nname.substring(0,4);
-                }
-                if (vname.length() > 3){
-                    vname = vname.substring(0,3);
-                }
-                autorID = nname + vname;
+            if (autorID != "Auto") {
+                dv.aendern("INSERT INTO autoren Values('" + autorID + "','" + vorname + "','" + nachname + "');");
             }
-            else {
-                try {
-                    while (rsa.next()) {
-                        autorID = rsa.getString(1).toString();
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+
+
             if (tableadd == "neue_bücher"){
                 Log.i("lesen", "Select kategorieID From kategorie Where name = '"+kategorieID+"' or kategorieID ='"+kategorieID+"';");
                 rsa = dv.lesen("Select kategorieID From kategorie Where name = '"+kategorieID+"' or kategorieID ='"+kategorieID+"';");
@@ -405,7 +439,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 } catch (SQLException e){
                     e.printStackTrace();
                 }
-                insert="Insert into neue_bücher Values('"+isbn+"','"+titel.substring(7)+"','"+autorID+"',"+seriegelesen+",'"+serieID+"','"+seriennr+"','"+kategorieID+"','');";
+                if (titel.startsWith("Titel: ")){
+                    titel= titel.substring(7);
+                }
+                insert="Insert into neue_bücher Values('"+isbn+"','"+titel+"','"+autorID+"',"+seriegelesen+",'"+serieID+"','"+seriennr+"','"+kategorieID+"','');";
                 Log.i("insert", insert);
             }
             else if (tableadd == "bücher_gelesen"){

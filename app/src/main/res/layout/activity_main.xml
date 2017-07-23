@@ -151,28 +151,6 @@
         android:layout_alignParentStart="true" />
 
     <AutoCompleteTextView
-        android:id="@+id/autoCompleteTextView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/scan_titel"
-        android:layout_marginTop="10dp"
-        android:dropDownWidth="220dp"
-        android:text="Autor" />
-
-    <AutoCompleteTextView
-        android:id="@+id/autor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/scan_titel"
-        android:layout_marginTop="10dp"
-        android:dropDownWidth="220dp"
-        android:text="Autor" />
-
-    <AutoCompleteTextView
         android:id="@+id/serienreihe"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
