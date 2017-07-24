@@ -141,12 +141,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
     public void onClick(View v) {
         Log.i("click", String.valueOf(v.getId()));
+        bewertung.setVisibility(View.VISIBLE);
         if (v.getId() == R.id.scan_button) {
             new reset();
             schongelesen=false;
             IntentIntegrator scanIntegrator = new IntentIntegrator(this);
             scanIntegrator.initiateScan();
-
+            bewertung.setVisibility(View.VISIBLE);
 
         }
         if (v.getId() == R.id.neu_gelesen) {
@@ -156,7 +157,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             titel = titelTxt.getText().toString();
             seriennr = serieNmb.getText().toString();
             if (seriennr.equals("Nummer")){ seriennr = ""; }
-
+            if (serieID == null && serieTxt.getText().toString() !="Reihentitel"){
+                serieID = serieTxt.getText().toString();
+            }
+            if (autorID ==null){
+                autorID = autorlist.getText().toString();
+            }
             float bewert1 = bewertung.getRating() * 2;
             bewert = Math.round(bewert1);
             tableadd = "bücher_gelesen";
@@ -179,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             if (autorID ==null){
                 autorID = autorlist.getText().toString();
             }
-            if (serieID ==null && serieTxt.getText().toString() !="Reihentitel"){
+            if (serieID == null && serieTxt.getText().toString() !="Reihentitel"){
                 serieID = serieTxt.getText().toString();
             }
 
@@ -303,7 +309,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                      else if(schongelesen==false){
                         neugelesen.setVisibility(View.VISIBLE);
                          newwishlist.setVisibility(View.VISIBLE);
-                         bewertung.setVisibility(View.VISIBLE);
                      }
                      else{
                          neugelesen.setVisibility(View.VISIBLE);
@@ -319,9 +324,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
      }
     private class reset{
-        private void resetFields() {
+        public void resetFields() {
 
-            scanBtn.setText("");
             isbnTxt.setText("ISBN");
             //autorTxt.setText("Autor");
             autorlist.setText("Autor");
@@ -330,8 +334,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             if (cbSerie.isChecked()) {
                 cbSerie.setChecked(false);
             }
-            serieTxt.setText("");
-            serieNmb.setText("");
+            serieTxt.setText("Reihe");
+            serieNmb.setText("Nummer");
+            serieID = null;
+            autorID = null;
+            bewertung.setRating(0);
+
         }
 
     }
@@ -361,9 +369,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                         String serie[] =  serieID.split(" ");
                         Integer serien = serie.length -1;
-                        serieID = serie[1];
+                        serieID = serie[0];
                         if (serien==1){
-                            serieID = serieID.substring(1,6);
+                            serieID = serieID.substring(0,6);
                         }
                         else {
                             for (Integer i = 1; i < serien; i++) {
@@ -388,8 +396,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
+
+
+
                 if (serieID !="keine") {
-                    dv.aendern("INSERT INTO serie Values ('" + serieID + "','" + serientitel + "','');");
+                    Log.i("aender", "INSERT INTO serie Values ('" + serieID + "','" + serientitel + "','');");
+                    dv.aendern("INSERT INTO serie Values ('" + serieID + "','" + serientitel + "','"+11+"');");
                 }
             }
             rsa = dv.lesen("Select idAutoren, Concat(vorname, nachname) as name from autoren where CONCAT(vorname, ' ', nachname) like '"+autorID+"';");
@@ -411,6 +423,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         vname = vname.substring(0,3);
                     }
                     autorID = nname + vname;
+                    if (autorID != "Auto") {
+                        dv.aendern("INSERT INTO autoren Values('" + autorID + "','" + vorname + "','" + nachname + "');");
+                    }
                 }
                 else {
                     try {
@@ -424,24 +439,19 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            if (autorID != "Auto") {
-                dv.aendern("INSERT INTO autoren Values('" + autorID + "','" + vorname + "','" + nachname + "');");
+            Log.i("lesen", "Select kategorieID From kategorie Where name = '"+kategorieID+"' or kategorieID ='"+kategorieID+"';");
+            rsa = dv.lesen("Select kategorieID From kategorie Where name = '"+kategorieID+"' or kategorieID ='"+kategorieID+"';");
+            try{
+                while (rsa.next()){
+                    kategorieID = rsa.getString(1);
+                }
+            } catch (SQLException e){
+                e.printStackTrace();
             }
 
-
             if (tableadd == "neue_bücher"){
-                Log.i("lesen", "Select kategorieID From kategorie Where name = '"+kategorieID+"' or kategorieID ='"+kategorieID+"';");
-                rsa = dv.lesen("Select kategorieID From kategorie Where name = '"+kategorieID+"' or kategorieID ='"+kategorieID+"';");
-                try{
-                    while (rsa.next()){
-                        kategorieID = rsa.getString(1);
-                    }
-                } catch (SQLException e){
-                    e.printStackTrace();
-                }
-                if (titel.startsWith("Titel: ")){
-                    titel= titel.substring(7);
-                }
+
+
                 insert="Insert into neue_bücher Values('"+isbn+"','"+titel+"','"+autorID+"',"+seriegelesen+",'"+serieID+"','"+seriennr+"','"+kategorieID+"','');";
                 Log.i("insert", insert);
             }
@@ -475,7 +485,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             alert.show();
 
 
-            new reset();
+            new reset().resetFields();
         }
 
 

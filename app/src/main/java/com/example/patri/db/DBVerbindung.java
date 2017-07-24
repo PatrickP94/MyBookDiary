@@ -16,8 +16,9 @@ public class DBVerbindung {
 	 public void oeffneDB() {
 	      try {
 	            Class.forName("com.mysql.jdbc.Driver").newInstance();
-	            mdbBistro = DriverManager.getConnection("jdbc:mysql://Diskstation_01/bücher","Patrick","pa1906pr");
-	            stmtSQL = mdbBistro.createStatement();
+	            //mdbBistro = DriverManager.getConnection("jdbc:mysql://Diskstation_01/bücher","Patrick","pa1906pr");
+              mdbBistro = DriverManager.getConnection("jdbc:mysql://Diskstation_01/katrin_books","Patrick","pa1906pr");
+              stmtSQL = mdbBistro.createStatement();
 	            Log.i("DBVerbindung", "Erfolgreiche Datenbankverbindung hergestellt");
 	      }
 	      catch (ClassNotFoundException e) {

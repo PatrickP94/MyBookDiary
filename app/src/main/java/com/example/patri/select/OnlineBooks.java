@@ -1,7 +1,6 @@
 package com.example.patri.select;
 
 import android.os.AsyncTask;
-import android.view.View;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -70,9 +69,8 @@ public class OnlineBooks {
                 String titel = result.select("tr.menuElem").first().text().toString();
                 Integer i = titel.indexOf("1. ");
                 Integer j = titel.indexOf(" 1. ");
-                titelTxt.setText("Titel: " + titel.substring(i + 3, j));
+                titelTxt.setText(titel.substring(i + 3, j));
             }
-            bewertung.setVisibility(View.INVISIBLE);
 
         }
     }
