@@ -25,6 +25,7 @@ import com.example.patri.db.DBVerbindung;
 import com.example.patri.select.GetSerie;
 import com.example.patri.select.OnlineBooks;
 import com.example.patri.select.getAutor;
+import com.example.patri.select.getKategorie;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -36,7 +37,7 @@ import java.util.concurrent.ExecutionException;
 public class MainActivity extends AppCompatActivity implements OnClickListener {
     private String isbn, autorID, kategorieID, serieID, titel,seriennr, tableadd;
     private AutoCompleteTextView autorlist, serieTxt;
-    private Integer bewert;
+    private Integer bewert, countserie;
     private Button scanBtn, newwishlist,neugelesen;
     private TextView isbnTxt, titelTxt, serieNmb;
     private CheckBox cbSerie;
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         neugelesen = (Button)findViewById(R.id.neu_gelesen);
         neugelesen.setOnClickListener(this);
         spKategorie = (Spinner)findViewById(R.id.spKategorie);
-        ArrayList autor,serielist;
+        ArrayList autor,serielist, kategorielist;
         cbSerie = (CheckBox) findViewById(R.id.cbSerie);
         cbSerie.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -120,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             GetSerie gS = new GetSerie();
             try {
                 serielist = gS.serienlistAbrufen();
+                countserie =serielist.size()+1;
             } catch (SQLException e) {
                 e.printStackTrace();
                 serielist = null;
@@ -135,9 +137,21 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             serieTxt.setAdapter(adapterserie);
         }
         Spinner dropdown = (Spinner)findViewById(R.id.spKategorie);
-        String[] items = new String[]{"","Biografie", "Komödie", "Comic","Esoterik","Fantasy","Fiction Mashup", "Gegenwartsliteratur", "Historische Romane", "Jugendromane/Schullektüre", "Kriminalroman", "Liebesromane", "Politik", "Psychothriller", "Science Fiction","Thriller"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
+        getKategorie gK = new getKategorie();
+       // String[] items = new String[]{"","Biografie", "Komödie", "Comic","Esoterik","Fantasy","Fiction Mashup", "Gegenwartsliteratur", "Historische Romane", "Jugendromane/Schullektüre", "Kriminalroman", "Liebesromane", "Politik", "Psychothriller", "Science Fiction","Thriller"};
+        kategorielist =null;
+        try {
+            kategorielist = gK.kategorieListeabrufen();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, kategorielist);
         dropdown.setAdapter(adapter);
+        dropdown.setSelection(0);
     }
     public void onClick(View v) {
         Log.i("click", String.valueOf(v.getId()));
@@ -363,14 +377,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 serientitel = "";
             }
             else{
-                rsa = dv.lesen("Select serienID from serie where serientitel = '"+serieID+"';");
+                rsa = dv.lesen("Select serienID from serie where serientitel like '"+serieID+"';");
                 try {
-                    if (!rsa.next()){
+                    if (rsa.next()){
+                        try {
+                            serieID = rsa.getString(1).toString();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
 
+
+                    }
+                    else {
                         String serie[] =  serieID.split(" ");
                         Integer serien = serie.length -1;
                         serieID = serie[0];
-                        if (serien==1){
+                        if (serien<1 && serieID.length()>6){
                             serieID = serieID.substring(0,6);
                         }
                         else {
@@ -379,23 +401,23 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                                     serieID= serie[1];
                                 }
                             }
-                            if (serieID.length() > 6){serieID=serieID.substring(1,6);}
+                            if (serieID.length() > 6){serieID=serieID.substring(0,6);}
 
                         }
+                        rsa = dv.lesen("Select serienID, Count(*) from serie where serientitel = '"+serieID+"';");
+                        if (rsa.next()){
 
+                        }
+                        else{
+                            serieID = countserie.toString();
+                        }
                     }
-                    else {
-                        try {
-                            while (rsa.next()) {
-                                serieID = rsa.getString(1).toString();
-                            }
+
+
                         } catch (SQLException e) {
                             e.printStackTrace();
-                        }
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+
 
 
 
@@ -429,9 +451,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 }
                 else {
                     try {
-                        while (rsa.next()) {
                             autorID = rsa.getString(1).toString();
-                        }
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
