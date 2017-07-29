@@ -26,6 +26,7 @@ import com.example.patri.select.GetSerie;
 import com.example.patri.select.OnlineBooks;
 import com.example.patri.select.getAutor;
 import com.example.patri.select.getKategorie;
+import com.example.patri.select.readDB;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -35,6 +36,11 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity implements OnClickListener {
+    DBVerbindung dv;
+    Boolean schongelesen, verbindungOk = false;
+    ResultSet testText;
+    Spinner spKategorie;
+    Integer seriegelesen;
     private String isbn, autorID, kategorieID, serieID, titel,seriennr, tableadd;
     private AutoCompleteTextView autorlist, serieTxt;
     private Integer bewert, countserie;
@@ -42,11 +48,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private TextView isbnTxt, titelTxt, serieNmb;
     private CheckBox cbSerie;
     private RatingBar bewertung;
-    DBVerbindung dv;
-    Boolean schongelesen, verbindungOk =false;
-    ResultSet testText;
-    Spinner spKategorie;
-    Integer seriegelesen;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -153,6 +155,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         dropdown.setAdapter(adapter);
         dropdown.setSelection(0);
     }
+
+
     public void onClick(View v) {
         Log.i("click", String.valueOf(v.getId()));
         bewertung.setVisibility(View.VISIBLE);
@@ -221,7 +225,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             isbnTxt.setText(scanContent);
             isbn=scanContent;
             if (verbindungOk){
-                new readDB().execute();
+                //new readDB().execute();
+                readDB rdb = new readDB();
+                rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this);
+                rdb.readmyDatabase();
+
+
             }
             else{
                 OnlineBooks ob = new OnlineBooks();
@@ -235,108 +244,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
     }
 
-     private class readDB extends AsyncTask<Void, Void, ResultSet> {
-         @Override
-         protected ResultSet doInBackground(Void... params) {
-             ResultSet rsa;
-             rsa = null;
-             DBVerbindung dv = new DBVerbindung();
-             Log.i("abfrage","Select * From (Select *, 'gelesen' From bücher_gelesen union all select * ,'', '','neu' from neue_bücher)t1" +
-                     " inner join autoren on t1.autor = autoren.idAutoren inner join kategorie on t1.kategorie = kategorie.kategorieId inner join serie on serie.serienId = t1.serienid " +
-                     "where ISBN = "+isbn);
-             rsa=dv.lesen("Select * From (Select *, 'gelesen' From bücher_gelesen union all select * ,'', '','neu' from neue_bücher)t1" +
-                     " inner join autoren on t1.autor = autoren.idAutoren inner join kategorie on t1.kategorie = kategorie.kategorieId inner join serie on serie.serienId = t1.serienid " +
-                     "where ISBN = "+isbn);
-             try {
-                 if (rsa.next()) {
-                     return rsa;
+    public String getWifiName(Context context) {
+        String ssid = "none";
+        WifiManager wifiManager = (WifiManager) context.getSystemService(WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        ssid = wifiInfo.getSSID();
 
-               }
-                 else {
-                     rsa=null;
-                 }
-             } catch (SQLException e) {
-                 e.printStackTrace();
+        return ssid;
+    }
 
-             }
-
-             return rsa;
-         }
-
-         @Override
-         protected void onPostExecute(ResultSet result) {
-             Integer i;
-             Boolean schongelesen;
-             //if you had a ui element, you could display the title
-             if (result==null){
-                 //new MyTask().execute();
-                 OnlineBooks ob = new OnlineBooks();
-                 ob.OnlineBooks(isbn, autorlist, titelTxt, bewertung);
-             }
-             else {
-                 try {
-                     //autorTxt.setText(result.getString(13).toString() + " " + result.getString(14).toString());
-                     autorlist.setText(result.getString(13).toString() + " " + result.getString(14).toString());
-                     autorID = result.getString(3).toString();
-                     titelTxt.setText(result.getString(2).toString());
-                    for (Integer j = 1; j < spKategorie.getCount(); j++) {
-                         if (spKategorie.getItemAtPosition(j).equals(result.getString(16).toString())) {
-                             spKategorie.setSelection(j);
-                         }
-                     }
-                     kategorieID = result.getString(15).toString();
-                     Log.i("GetString(5)",result.getString(5));
-                     if (result.getString(4).toString().contentEquals("0"))  {
-                         serieTxt.setText("keine Serie");
-                         serieNmb.setText("0");
-                     }
-                     else {
-
-                         cbSerie.setChecked(true);
-                         serieTxt.setText(result.getString(18).toString());
-                         serieNmb.setText(result.getString(6).toString());
-                     }
-                     serieID = result.getString(5);
-
-                     Log.i("Bewertung", result.getString(8).toString());
-                     Float rating = result.getFloat(8) / 2;
-                     bewertung.setRating(rating);
-
-                     schongelesen = result.getString(11).toString().contentEquals("gelesen");
-
-                     if (schongelesen==true){
-                         AlertDialog.Builder myAlert = new AlertDialog.Builder(MainActivity.this);
-                         myAlert.setPositiveButton("Continue..", new DialogInterface.OnClickListener() {
-                             @Override
-                             public void onClick(DialogInterface dialog, int which) {
-                                 dialog.dismiss();
-                             }
-                         });
-                         myAlert.setMessage("Buch bereits gelesen").create();
-                         AlertDialog alert = myAlert.create();
-
-                         alert.show();
-                         neugelesen.setVisibility(View.INVISIBLE);
-                         newwishlist.setVisibility(View.INVISIBLE);
-
-                     }
-                     else if(schongelesen==false){
-                        neugelesen.setVisibility(View.VISIBLE);
-                         newwishlist.setVisibility(View.VISIBLE);
-                     }
-                     else{
-                         neugelesen.setVisibility(View.VISIBLE);
-                         newwishlist.setText(View.VISIBLE);
-                     }
-
-                 } catch (SQLException e) {
-                     e.printStackTrace();
-                 }
-             }
-
-         }
-
-     }
     private class reset{
         public void resetFields() {
 
@@ -510,15 +426,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
 
         }
-
-    public String getWifiName(Context context) {
-        String ssid = "none";
-        WifiManager wifiManager = (WifiManager) context.getSystemService(WIFI_SERVICE);
-        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-        ssid = wifiInfo.getSSID();
-
-        return ssid;
-    }
 
 
 }
