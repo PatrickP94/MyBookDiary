@@ -10,12 +10,16 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -23,6 +27,7 @@ import android.widget.Toast;
 
 import com.example.patri.db.DBVerbindung;
 import com.example.patri.select.GetSerie;
+import com.example.patri.select.MyListview;
 import com.example.patri.select.OnlineBooks;
 import com.example.patri.select.getAutor;
 import com.example.patri.select.getKategorie;
@@ -48,6 +53,17 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private TextView isbnTxt, titelTxt, serieNmb;
     private CheckBox cbSerie;
     private RatingBar bewertung;
+    private ListView lv;
+    private Context context;
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         spKategorie = (Spinner)findViewById(R.id.spKategorie);
         ArrayList autor,serielist, kategorielist;
         cbSerie = (CheckBox) findViewById(R.id.cbSerie);
+        context = MainActivity.this;
+
         cbSerie.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v)
@@ -253,6 +271,58 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         return ssid;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_show_mybooks:
+                setContentView(R.layout.listview);
+                lv = (ListView) findViewById(R.id.booklist);
+
+                ArrayAdapter<String> adapterB;
+                MyListview mlv = new MyListview();
+                ArrayList mybooks;
+                mybooks = null;
+                try {
+                    mybooks = mlv.booklist("gelesen");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                adapterB = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mybooks);
+                lv.setAdapter(adapterB);
+                break;
+            case R.id.action_show_newbooks:
+                setContentView(R.layout.listview);
+                lv = (ListView) findViewById(R.id.booklist);
+
+                ArrayAdapter<String> adapterC;
+                MyListview nlv = new MyListview();
+                ArrayList newbooks;
+                newbooks = null;
+                try {
+                    newbooks = nlv.booklist("wishlist");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                adapterC = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, newbooks);
+                lv.setAdapter(adapterC);
+                break;
+            case R.id.action_show_home:
+                setContentView(R.layout.activity_main);
+                break;
+
+
+        }
+        return true;
+    }
+
     private class reset{
         public void resetFields() {
 
@@ -350,7 +420,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     vorname = name[0];
                     nachname="";
                     for (Integer i=1;i <= names;i++){
-                        nachname = nachname+name[1];
+                        nachname = nachname + name[i];
                     }
                     vname= name[0];
                     nname = name[names];
@@ -426,7 +496,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
 
         }
-
 
 }
 

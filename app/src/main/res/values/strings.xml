@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">MyBookDiary</string>
     <string name="scan">Scan</string>
+
+    <string name="action_show_mybooks">Zeige gelesene Bücher</string>
+    <string name="action_show_newbooks">Zeige neue Bücher</string>
+    <string name="action_show_home">Home Screen</string>
 </resources>
