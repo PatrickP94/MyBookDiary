@@ -15,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -35,6 +36,8 @@ import com.example.patri.select.readDB;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.w3c.dom.Text;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -54,7 +57,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private CheckBox cbSerie;
     private RatingBar bewertung;
     private ListView lv;
-    private Context context;
+    private Object obj;
+    private String[] items;
+    private ArrayList autor,serielist, kategorielist;
 
 
     @Override
@@ -79,9 +84,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         neugelesen = (Button)findViewById(R.id.neu_gelesen);
         neugelesen.setOnClickListener(this);
         spKategorie = (Spinner)findViewById(R.id.spKategorie);
-        ArrayList autor,serielist, kategorielist;
+
         cbSerie = (CheckBox) findViewById(R.id.cbSerie);
-        context = MainActivity.this;
+        obj=this;
 
         cbSerie.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -273,11 +278,67 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         switch (item.getItemId()) {
             case R.id.action_show_mybooks:
                 setContentView(R.layout.listview);
                 lv = (ListView) findViewById(R.id.booklist);
+                lv.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
+                        String item = lv.getItemAtPosition(position).toString();
+                        items = item.split(" ");
+                        isbn = items[0];
+                        setContentView(R.layout.activity_main);
+                        isbnTxt = (TextView)findViewById(R.id.scan_isbn) ;
+                        isbnTxt.setText(isbn);
+                        titelTxt = (TextView)findViewById(R.id.scan_titel);
+                        autorlist = (AutoCompleteTextView) findViewById(R.id.autoren);
+                        bewertung = (RatingBar) findViewById(R.id.ratingBar1);
+                        spKategorie = (Spinner)findViewById(R.id.spKategorie);
+                        Spinner dropdown = (Spinner)findViewById(R.id.spKategorie);
+                        getKategorie gK = new getKategorie();
+                        kategorielist =null;
+                        try {
+                            kategorielist = gK.kategorieListeabrufen();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, kategorielist);
+                        dropdown.setAdapter(adapter);
+                        dropdown.setSelection(0);
+                        serieNmb = (TextView)findViewById(R.id.serieNmb);
+                        neugelesen = (Button)findViewById(R.id.neu_gelesen);
+                        newwishlist = (Button)findViewById(R.id.neuwishlist);
+                        cbSerie = (CheckBox) findViewById(R.id.cbSerie);
 
+                        cbSerie.setOnClickListener(new View.OnClickListener(){
+                            @Override
+                            public void onClick(View v)
+                            {
+                                if (cbSerie.isChecked())
+                                {
+                                    serieTxt.setVisibility(View.VISIBLE);
+                                    serieNmb.setVisibility(View.VISIBLE);
+                                }
+                                else
+                                {
+                                    serieTxt.setVisibility(View.INVISIBLE);
+                                    serieNmb.setVisibility(View.INVISIBLE);
+                                }
+                            }
+                        });
+                        serieTxt = (AutoCompleteTextView) findViewById(R.id.serienreihe);
+
+                        readDB rdb = new readDB();
+                        rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this);
+                        rdb.readmyDatabase();
+                    }
+                });
                 ArrayAdapter<String> adapterB;
                 MyListview mlv = new MyListview();
                 ArrayList mybooks;
@@ -297,7 +358,61 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             case R.id.action_show_newbooks:
                 setContentView(R.layout.listview);
                 lv = (ListView) findViewById(R.id.booklist);
+                lv.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
+                        String item = lv.getItemAtPosition(position).toString();
+                        items = item.split(" ");
+                        isbn = items[0];
+                        setContentView(R.layout.activity_main);
+                        isbnTxt = (TextView)findViewById(R.id.scan_isbn) ;
+                        isbnTxt.setText(isbn);
+                        titelTxt = (TextView)findViewById(R.id.scan_titel);
+                        autorlist = (AutoCompleteTextView) findViewById(R.id.autoren);
+                        bewertung = (RatingBar) findViewById(R.id.ratingBar1);
+                        spKategorie = (Spinner)findViewById(R.id.spKategorie);
+                        Spinner dropdown = (Spinner)findViewById(R.id.spKategorie);
+                        getKategorie gK = new getKategorie();
+                        kategorielist =null;
+                        try {
+                            kategorielist = gK.kategorieListeabrufen();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, kategorielist);
+                        dropdown.setAdapter(adapter);
+                        dropdown.setSelection(0);
+                        serieNmb = (TextView)findViewById(R.id.serieNmb);
+                        neugelesen = (Button)findViewById(R.id.neu_gelesen);
+                        newwishlist = (Button)findViewById(R.id.neuwishlist);
+                        cbSerie = (CheckBox) findViewById(R.id.cbSerie);
 
+                        cbSerie.setOnClickListener(new View.OnClickListener(){
+                            @Override
+                            public void onClick(View v)
+                            {
+                                if (cbSerie.isChecked())
+                                {
+                                    serieTxt.setVisibility(View.VISIBLE);
+                                    serieNmb.setVisibility(View.VISIBLE);
+                                }
+                                else
+                                {
+                                    serieTxt.setVisibility(View.INVISIBLE);
+                                    serieNmb.setVisibility(View.INVISIBLE);
+                                }
+                            }
+                        });
+                        serieTxt = (AutoCompleteTextView) findViewById(R.id.serienreihe);
+                        readDB rdb = new readDB();
+                        rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this);
+                        rdb.readmyDatabase();
+                    }
+                });
                 ArrayAdapter<String> adapterC;
                 MyListview nlv = new MyListview();
                 ArrayList newbooks;

@@ -15,6 +15,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.patri.db.DBVerbindung;
+import com.example.patri.mybookdiary.R;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -115,15 +116,15 @@ public class readDB extends Activity {
                     } else {
 
                         cbSerie.setChecked(true);
+                        serieTxt.setVisibility(View.VISIBLE);
+                        serieNmb.setVisibility(View.VISIBLE);
                         serieTxt.setText(result.getString(18).toString());
                         serieNmb.setText(result.getString(6).toString());
                     }
                     serieID = result.getString(5);
 
-                    Log.i("Bewertung", result.getString(8).toString());
                     Float rating = result.getFloat(8) / 2;
                     bewertung.setRating(rating);
-                    Log.i("gelesen?", result.getString(11));
                     schongelesen = result.getString(11).toString().contentEquals("gelesen");
                     if (schongelesen == true) {
                         AlertDialog.Builder myAlert = new AlertDialog.Builder(context);
@@ -137,7 +138,8 @@ public class readDB extends Activity {
                         AlertDialog alert = myAlert.create();
 
                         alert.show();
-                        neugelesen.setVisibility(View.INVISIBLE);
+                        //neugelesen.setVisibility(View.INVISIBLE);
+                        neugelesen.setText("Änderungen speichern");
                         newwishlist.setVisibility(View.INVISIBLE);
 
                     } else if (schongelesen == false) {

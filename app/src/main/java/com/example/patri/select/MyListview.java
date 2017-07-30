@@ -44,15 +44,13 @@ public class MyListview extends Activity {
             DBVerbindung dv = new DBVerbindung();
             dv.oeffneDB();
             String select;
-            select = "Select t1.titel, Concat(autoren.vorname,' ', autoren.nachname) From " + table + " as t1 " +
+            select = "Select t1.isbn, t1.titel, Concat(autoren.vorname,' ', autoren.nachname) From " + table + " as t1 " +
                     " inner join autoren on t1.autor = autoren.idAutoren inner join kategorie on t1.kategorie = kategorie.kategorieId inner join serie on serie.serienId = t1.serienid;";
             Log.i("test", select);
             rsa = dv.lesen(select);
             try {
                 while (rsa.next()) {
-                    Log.i("1", rsa.getString(1));
-                    Log.i("2", rsa.getString(2));
-                    books.add(i, rsa.getString(1) + " - " + rsa.getString(2));
+                    books.add(i, rsa.getString(1) + " - " + rsa.getString(2)+ " : "+rsa.getString(3));
                     i++;
                 }
             } catch (SQLException e) {
