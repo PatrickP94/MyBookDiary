@@ -36,8 +36,6 @@ import com.example.patri.select.readDB;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import org.w3c.dom.Text;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -60,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private Object obj;
     private String[] items;
     private ArrayList autor,serielist, kategorielist;
+    private String user;
 
 
     @Override
@@ -179,6 +178,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         dropdown.setSelection(0);
     }
 
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
 
     public void onClick(View v) {
         Log.i("click", String.valueOf(v.getId()));
@@ -431,6 +437,21 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 break;
             case R.id.action_show_home:
                 setContentView(R.layout.activity_main);
+                break;
+
+            case R.id.action_show_statistic:
+                Intent intent = new Intent(this, LoginActivity.class);
+                startActivity(intent);
+                break;
+
+            case R.id.action_logout:
+                Intent intent2 = new Intent(this, LogoutActivity.class);
+                startActivity(intent2);
+                break;
+
+            case R.id.action_delete_user:
+                Intent intent3 = new Intent(this, DeleteUserActivity.class);
+                startActivity(intent3);
                 break;
 
 

@@ -2,6 +2,8 @@ package com.example.patri.db;
 
 import android.util.Log;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -9,16 +11,33 @@ import java.sql.SQLException;
 import java.sql.Statement;
 public class DBVerbindung {
 
+	public String table, user;
 	Connection mdbBistro = null;  // Verbindungsobjekt
 	Statement stmtSQL = null; // Hier wird das "SQL-Statement-Objekt" deklariert
 	ResultSet rs;
-	
+	private FirebaseAuth auth;
+
+	public void setuser(String user) {
+		this.user = user;
+	}
+
 	 public void oeffneDB() {
+		 auth = FirebaseAuth.getInstance();
+		 user = auth.getCurrentUser().getEmail();
+		 switch (user) {
+			 case "pattyp18@arcor.de":
+				 table = "bücher";
+				 break;
+			 case "katrinpreiss99@gmail.com":
+				 table = "katrin_books";
+				 break;
+		 }
+
 	      try {
 	            Class.forName("com.mysql.jdbc.Driver").newInstance();
 	            //mdbBistro = DriverManager.getConnection("jdbc:mysql://Diskstation_01/bücher","Patrick","pa1906pr");
-              mdbBistro = DriverManager.getConnection("jdbc:mysql://Diskstation_01/katrin_books","Patrick","pa1906pr");
-              stmtSQL = mdbBistro.createStatement();
+			  mdbBistro = DriverManager.getConnection("jdbc:mysql://Diskstation_01/" + table, "Patrick", "pa1906pr");
+			  stmtSQL = mdbBistro.createStatement();
 	            Log.i("DBVerbindung", "Erfolgreiche Datenbankverbindung hergestellt");
 	      }
 	      catch (ClassNotFoundException e) {

@@ -14,5 +14,17 @@
         android:id="@+id/action_show_home"
         android:title="@string/action_show_home"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_show_statistic"
+        android:title="@string/action_show_stats"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_logout"
+        android:title="@string/action_logout"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_delete_user"
+        android:title="@string/action_delete_user"
+        app:showAsAction="never" />
 
 </menu>

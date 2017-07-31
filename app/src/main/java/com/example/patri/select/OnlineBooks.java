@@ -1,8 +1,10 @@
 package com.example.patri.select;
 
 import android.os.AsyncTask;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -10,7 +12,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 
-public class OnlineBooks {
+public class OnlineBooks extends AppCompatActivity {
     public String isbn;
     public TextView autorTxt, titelTxt;
     public RatingBar bewertung;
@@ -62,14 +64,20 @@ public class OnlineBooks {
             }
             else {
                 Element autor = result.select("tr.menuElem").first();
-                String autorname =autor.select("div.author").first().text().toString().replace("by ", "");
-                if (autorname.indexOf(";")>0){
-                    autorTxt.setText(autorname.substring(0,autorname.indexOf(";")));
+                try {
+                    String autorname = autor.select("div.author").first().text().toString().replace("by ", "");
+                    if (autorname.indexOf(";") > 0) {
+                        autorTxt.setText(autorname.substring(0, autorname.indexOf(";")));
+                    }
+                    String titel = result.select("tr.menuElem").first().text().toString();
+                    Integer i = titel.indexOf("1. ");
+                    Integer j = titel.indexOf(" 1. ");
+                    titelTxt.setText(titel.substring(i + 3, j));
+                } catch (Exception e) {
+                    Toast.makeText(OnlineBooks.this, "Buch nicht gefunden", Toast.LENGTH_LONG).show();
                 }
-                String titel = result.select("tr.menuElem").first().text().toString();
-                Integer i = titel.indexOf("1. ");
-                Integer j = titel.indexOf(" 1. ");
-                titelTxt.setText(titel.substring(i + 3, j));
+
+
             }
 
         }

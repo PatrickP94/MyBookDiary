@@ -45,7 +45,8 @@ public class MyListview extends Activity {
             dv.oeffneDB();
             String select;
             select = "Select t1.isbn, t1.titel, Concat(autoren.vorname,' ', autoren.nachname) From " + table + " as t1 " +
-                    " inner join autoren on t1.autor = autoren.idAutoren inner join kategorie on t1.kategorie = kategorie.kategorieId inner join serie on serie.serienId = t1.serienid;";
+                    " inner join autoren on t1.autor = autoren.idAutoren inner join kategorie on t1.kategorie = kategorie.kategorieId inner join serie on serie.serienId = t1.serienid " +
+                    "order by t1.titel;";
             Log.i("test", select);
             rsa = dv.lesen(select);
             try {

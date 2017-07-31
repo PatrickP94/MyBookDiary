@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "467610235979",
+    "firebase_url": "https://fir-mybookdiary.firebaseio.com",
+    "project_id": "firebase-mybookdiary",
+    "storage_bucket": "firebase-mybookdiary.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:467610235979:android:d5e14613f2a1c9a1",
+        "android_client_info": {
+          "package_name": "com.example.patri.mybookdiary"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "467610235979-s1vftef29fdagpvqnn5pi9ggoja5pd3h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.patri.mybookdiary",
+            "certificate_hash": "1aef4e5a195a86755a453de05aa6feba46c2ee1b"
+          }
+        },
+        {
+          "client_id": "467610235979-nqfnfikb5g3rf2ir9sfj4i19honrm7t7.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "467610235979-pk3gjs0r3tm5i6faoholt2alkqh5sbob.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDS1Z0dHwyxmpMSy15bqPBpc1G5G5rs54M"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "467610235979-nqfnfikb5g3rf2ir9sfj4i19honrm7t7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
