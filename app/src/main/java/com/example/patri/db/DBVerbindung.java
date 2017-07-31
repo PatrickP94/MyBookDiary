@@ -38,9 +38,8 @@ public class DBVerbindung {
 	            //mdbBistro = DriverManager.getConnection("jdbc:mysql://Diskstation_01/bücher","Patrick","pa1906pr");
 			  mdbBistro = DriverManager.getConnection("jdbc:mysql://Diskstation_01/" + table, "Patrick", "pa1906pr");
 			  stmtSQL = mdbBistro.createStatement();
-	            Log.i("DBVerbindung", "Erfolgreiche Datenbankverbindung hergestellt");
-	      }
-	      catch (ClassNotFoundException e) {
+			  Log.i("DBVerbindung", "Erfolgreiche Datenbankverbindung hergestellt");
+		  } catch (ClassNotFoundException e) {
 	            System.err.println(e);
 	            System.out.println("Fehler bei ClassNotFoundException");
 			  	Log.e("DBVerbindung", e.toString());
