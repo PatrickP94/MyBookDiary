@@ -34,5 +34,5 @@ dependencies {
     compile files('src/main/java/libs/jsoup-1.10.3.jar')
     compile files('src/main/java/libs/mysql-connector-java-5.1.7-bin.jar')
     compile 'com.google.firebase:firebase-auth:9.2.1'
-
+    compile files('libs/sqlite-jdbc-3.19.3.jar')
 }

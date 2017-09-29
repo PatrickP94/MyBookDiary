@@ -6,6 +6,8 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.patri.mybookdiary.MainActivity;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,6 +18,8 @@ public class OnlineBooks extends AppCompatActivity {
     public String isbn;
     public TextView autorTxt, titelTxt;
     public RatingBar bewertung;
+    private MainActivity ma = new MainActivity();
+    private Boolean verbindungok = ma.getVerbindungOk();
 
 
 
@@ -66,13 +70,15 @@ public class OnlineBooks extends AppCompatActivity {
                 Element autor = result.select("tr.menuElem").first();
                 try {
                     String autorname = autor.select("div.author").first().text().toString().replace("by ", "");
-                    if (autorname.indexOf(";") > 0) {
-                        autorTxt.setText(autorname.substring(0, autorname.indexOf(";")));
+                    if (autorname != null) {
+                        if (autorname.indexOf(";") > 0) {
+                            autorTxt.setText(autorname.substring(0, autorname.indexOf(";")));
+                        }
+                        String titel = result.select("tr.menuElem").first().text().toString();
+                        Integer i = titel.indexOf("1. ");
+                        Integer j = titel.indexOf(" 1. ");
+                        titelTxt.setText(titel.substring(i + 3, j));
                     }
-                    String titel = result.select("tr.menuElem").first().text().toString();
-                    Integer i = titel.indexOf("1. ");
-                    Integer j = titel.indexOf(" 1. ");
-                    titelTxt.setText(titel.substring(i + 3, j));
                 } catch (Exception e) {
                     Toast.makeText(OnlineBooks.this, "Buch nicht gefunden", Toast.LENGTH_LONG).show();
                 }

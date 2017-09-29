@@ -16,10 +16,13 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.patri.db.DBVerbindung;
+import com.example.patri.db.DataBaseHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.io.IOException;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -32,17 +35,31 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        DataBaseHelper myDbHelper;
+        myDbHelper = new DataBaseHelper(this);
+
+        try {
+
+            myDbHelper.createDataBase();
+
+        } catch (IOException ioe) {
+
+            throw new Error("Unable to create database");
+
+        }
+
         //Get Firebase auth instance
         auth = FirebaseAuth.getInstance();
         DBVerbindung dv = new DBVerbindung();
-        dv.setuser(auth.getCurrentUser().getEmail());
-        MainActivity ma = new MainActivity();
-        ma.setUser(auth.getCurrentUser().getEmail());
         if (auth.getCurrentUser() != null) {
-            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-            finish();
+            dv.setuser(auth.getCurrentUser().getEmail());
+            MainActivity ma = new MainActivity();
+            ma.setUser(auth.getCurrentUser().getEmail());
+            if (auth.getCurrentUser() != null) {
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                finish();
+            }
         }
-
         // set the view now
         setContentView(R.layout.loginpage);
 

@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 public class DBVerbindung {
 
 	public String table, user;
@@ -34,11 +35,14 @@ public class DBVerbindung {
 		 }
 
 	      try {
-	            Class.forName("com.mysql.jdbc.Driver").newInstance();
-	            //mdbBistro = DriverManager.getConnection("jdbc:mysql://Diskstation_01/bücher","Patrick","pa1906pr");
+
+			  Class.forName("com.mysql.jdbc.Driver").newInstance();
+			  //mdbBistro = DriverManager.getConnection("jdbc:mysql://Diskstation_01/bücher","Patrick","pa1906pr");
 			  mdbBistro = DriverManager.getConnection("jdbc:mysql://Diskstation_01/" + table, "Patrick", "pa1906pr");
-			  stmtSQL = mdbBistro.createStatement();
-			  Log.i("DBVerbindung", "Erfolgreiche Datenbankverbindung hergestellt");
+			  if (mdbBistro != null) {
+				  stmtSQL = mdbBistro.createStatement();
+				  Log.i("DBVerbindung", "Erfolgreiche Datenbankverbindung hergestellt");
+			  }
 		  } catch (ClassNotFoundException e) {
 	            System.err.println(e);
 	            System.out.println("Fehler bei ClassNotFoundException");

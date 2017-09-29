@@ -1,14 +1,16 @@
 package com.example.patri.mybookdiary;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +22,8 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.Spinner;
@@ -27,12 +31,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.patri.db.DBVerbindung;
+import com.example.patri.db.DataBaseHelper;
 import com.example.patri.select.GetSerie;
 import com.example.patri.select.MyListview;
 import com.example.patri.select.OnlineBooks;
 import com.example.patri.select.getAutor;
 import com.example.patri.select.getKategorie;
 import com.example.patri.select.readDB;
+import com.example.patri.update.DeleteMe;
+import com.example.patri.update.updateLeseliste;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -43,7 +50,7 @@ import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity implements OnClickListener {
     DBVerbindung dv;
-    Boolean schongelesen, verbindungOk = false;
+    Boolean schongelesen, verbindungOk = false, erfolg;
     ResultSet testText;
     Spinner spKategorie;
     Integer seriegelesen;
@@ -53,12 +60,17 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private Button scanBtn, newwishlist,neugelesen;
     private TextView isbnTxt, titelTxt, serieNmb;
     private CheckBox cbSerie;
+    private EditText searchlv;
     private RatingBar bewertung;
     private ListView lv;
-    private Object obj;
+    private DataBaseHelper dbh;
     private String[] items;
     private ArrayList autor,serielist, kategorielist;
     private String user;
+    private ImageButton delete;
+    private ArrayList mybooks;
+    private ArrayAdapter<String> adapterB, adapterC;
+    private ProgressDialog progressBar;
 
 
     @Override
@@ -83,9 +95,36 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         neugelesen = (Button)findViewById(R.id.neu_gelesen);
         neugelesen.setOnClickListener(this);
         spKategorie = (Spinner)findViewById(R.id.spKategorie);
+        delete = (ImageButton) findViewById(R.id.delete);
+        delete.setOnClickListener(this);
 
         cbSerie = (CheckBox) findViewById(R.id.cbSerie);
-        obj=this;
+        dbh = new DataBaseHelper(this);
+
+        isbnTxt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                if (s.length() == 13) {
+                    readDB rdb = new readDB();
+                    rdb.readDB(s.toString(), autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk);
+                    rdb.readmyDatabase();
+                }
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() == 13) {
+                    readDB rdb = new readDB();
+                    rdb.readDB(s.toString(), autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk);
+                    rdb.readmyDatabase();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         cbSerie.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -125,11 +164,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             ob.OnlineBooks(isbn, autorlist, titelTxt, bewertung);
         }
         autorlist =(AutoCompleteTextView)findViewById(R.id.autoren);
-        if (verbindungOk) {
+
             getAutor autorenliste = new getAutor();
             autor = null;
             try {
-                autor = autorenliste.autorenlisteAbrufen();
+                autor = autorenliste.autorenlisteAbrufen(dbh);
             } catch (SQLException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
@@ -144,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             serieTxt = (AutoCompleteTextView) findViewById(R.id.serienreihe);
             GetSerie gS = new GetSerie();
             try {
-                serielist = gS.serienlistAbrufen();
+                serielist = gS.serienlistAbrufen(dbh);
                 countserie =serielist.size()+1;
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -159,13 +198,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             ArrayAdapter<String> adapterserie = new ArrayAdapter<String>(this,
                     android.R.layout.simple_dropdown_item_1line, serielist);
             serieTxt.setAdapter(adapterserie);
-        }
+
         Spinner dropdown = (Spinner)findViewById(R.id.spKategorie);
         getKategorie gK = new getKategorie();
        // String[] items = new String[]{"","Biografie", "Komödie", "Comic","Esoterik","Fantasy","Fiction Mashup", "Gegenwartsliteratur", "Historische Romane", "Jugendromane/Schullektüre", "Kriminalroman", "Liebesromane", "Politik", "Psychothriller", "Science Fiction","Thriller"};
         kategorielist =null;
         try {
-            kategorielist = gK.kategorieListeabrufen();
+            kategorielist = gK.kategorieListeabrufen(dbh);
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -177,6 +216,17 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         dropdown.setAdapter(adapter);
         dropdown.setSelection(0);
     }
+
+    public Boolean getVerbindungOk() {
+        return verbindungOk;
+    }
+
+    public DataBaseHelper getDBH() {
+
+        return dbh;
+
+    }
+
 
     public String getUser() {
         return user;
@@ -190,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         Log.i("click", String.valueOf(v.getId()));
         bewertung.setVisibility(View.VISIBLE);
         if (v.getId() == R.id.scan_button) {
-            new reset();
+            resetFields();
             schongelesen=false;
             IntentIntegrator scanIntegrator = new IntentIntegrator(this);
             scanIntegrator.initiateScan();
@@ -204,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             titel = titelTxt.getText().toString();
             seriennr = serieNmb.getText().toString();
             if (seriennr.equals("Nummer")){ seriennr = ""; }
-            if (serieID == null && serieTxt.getText().toString() !="Reihentitel"){
+            if (serieID == null && serieTxt.getText().toString() != "Reihentitel" || serieTxt.getText().toString() == "") {
                 serieID = serieTxt.getText().toString();
             }
             if (autorID ==null){
@@ -216,7 +266,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             if (kategorieID ==null){
                 kategorieID = spKategorie.getItemAtPosition(spKategorie.getSelectedItemPosition()).toString();
             }
-            new updateLeseliste().execute();
+            try {
+                erfolg = ul.updateLeseliste(serieID, autorID, kategorieID, tableadd, isbnTxt.getText().toString(), titel, bewert, seriennr, countserie, seriegelesen, schongelesen, MainActivity.this, dbh, verbindungOk);
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (erfolg) {
+                resetFields();
+            }
 
         }
         if (v.getId() == R.id.neuwishlist){
@@ -232,7 +291,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             if (autorID ==null){
                 autorID = autorlist.getText().toString();
             }
-            if (serieID == null && serieTxt.getText().toString() !="Reihentitel"){
+            if (serieID == null && serieTxt.getText().toString() != "Reihentitel" || serieTxt.getText().toString() == "") {
                 serieID = serieTxt.getText().toString();
             }
 
@@ -241,8 +300,26 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             if (kategorieID ==null){
                 kategorieID = spKategorie.getItemAtPosition(spKategorie.getSelectedItemPosition()).toString();
             }
-            new updateLeseliste().execute();
-
+            try {
+                erfolg = ul.updateLeseliste(serieID, autorID, kategorieID, tableadd, isbn, titel, bewert, seriennr, countserie, seriegelesen, schongelesen, MainActivity.this, dbh, verbindungOk);
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (erfolg) {
+                resetFields();
+            }
+        }
+        if (v.getId() == R.id.delete) {
+            DeleteMe dme = new DeleteMe();
+            try {
+                dme.DeleteMe(MainActivity.this, isbn, dbh, verbindungOk);
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -253,18 +330,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             String scanFormat = scanningResult.getFormatName();
             isbnTxt.setText(scanContent);
             isbn=scanContent;
-            if (verbindungOk){
                 //new readDB().execute();
                 readDB rdb = new readDB();
-                rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this);
+            rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk);
                 rdb.readmyDatabase();
 
-
-            }
-            else{
-                OnlineBooks ob = new OnlineBooks();
-                ob.OnlineBooks(isbn, autorlist, titelTxt, bewertung);
-            }
         }
         else{
             Toast toast = Toast.makeText(getApplicationContext(),
@@ -288,6 +358,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         switch (item.getItemId()) {
             case R.id.action_show_mybooks:
                 setContentView(R.layout.listview);
+                searchlv = (EditText) findViewById(R.id.searchList);
                 lv = (ListView) findViewById(R.id.booklist);
                 lv.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
                     @Override
@@ -296,6 +367,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         items = item.split(" ");
                         isbn = items[0];
                         setContentView(R.layout.activity_main);
+                        delete.setVisibility(View.VISIBLE);
                         isbnTxt = (TextView)findViewById(R.id.scan_isbn) ;
                         isbnTxt.setText(isbn);
                         titelTxt = (TextView)findViewById(R.id.scan_titel);
@@ -306,7 +378,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         getKategorie gK = new getKategorie();
                         kategorielist =null;
                         try {
-                            kategorielist = gK.kategorieListeabrufen();
+                            kategorielist = gK.kategorieListeabrufen(dbh);
                         } catch (SQLException e) {
                             e.printStackTrace();
                         } catch (ExecutionException e) {
@@ -341,16 +413,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         serieTxt = (AutoCompleteTextView) findViewById(R.id.serienreihe);
 
                         readDB rdb = new readDB();
-                        rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this);
+                        rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk);
                         rdb.readmyDatabase();
                     }
                 });
-                ArrayAdapter<String> adapterB;
+
                 MyListview mlv = new MyListview();
-                ArrayList mybooks;
+
                 mybooks = null;
                 try {
-                    mybooks = mlv.booklist("gelesen");
+                    mybooks = mlv.booklist("gelesen", dbh, verbindungOk);
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } catch (ExecutionException e) {
@@ -358,11 +430,29 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                final Context cont = this;
+                searchlv.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        MainActivity.this.adapterB.getFilter().filter(s);
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+
+                    }
+                });
                 adapterB = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mybooks);
                 lv.setAdapter(adapterB);
                 break;
             case R.id.action_show_newbooks:
                 setContentView(R.layout.listview);
+                searchlv = (EditText) findViewById(R.id.searchList);
                 lv = (ListView) findViewById(R.id.booklist);
                 lv.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
                     @Override
@@ -371,6 +461,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         items = item.split(" ");
                         isbn = items[0];
                         setContentView(R.layout.activity_main);
+                        delete.setVisibility(View.VISIBLE);
                         isbnTxt = (TextView)findViewById(R.id.scan_isbn) ;
                         isbnTxt.setText(isbn);
                         titelTxt = (TextView)findViewById(R.id.scan_titel);
@@ -381,7 +472,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         getKategorie gK = new getKategorie();
                         kategorielist =null;
                         try {
-                            kategorielist = gK.kategorieListeabrufen();
+                            kategorielist = gK.kategorieListeabrufen(dbh);
                         } catch (SQLException e) {
                             e.printStackTrace();
                         } catch (ExecutionException e) {
@@ -415,16 +506,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         });
                         serieTxt = (AutoCompleteTextView) findViewById(R.id.serienreihe);
                         readDB rdb = new readDB();
-                        rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this);
+                        rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk);
                         rdb.readmyDatabase();
                     }
                 });
-                ArrayAdapter<String> adapterC;
                 MyListview nlv = new MyListview();
                 ArrayList newbooks;
                 newbooks = null;
                 try {
-                    newbooks = nlv.booklist("wishlist");
+                    newbooks = nlv.booklist("wishlist", dbh, verbindungOk);
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } catch (ExecutionException e) {
@@ -432,6 +522,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                searchlv.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        MainActivity.this.adapterC.getFilter().filter(s);
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+
+                    }
+                });
                 adapterC = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, newbooks);
                 lv.setAdapter(adapterC);
                 break;
@@ -459,177 +565,22 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         return true;
     }
 
-    private class reset{
-        public void resetFields() {
 
-            isbnTxt.setText("ISBN");
+    public void resetFields() {
+
+        this.isbnTxt.setText("");
             //autorTxt.setText("Autor");
-            autorlist.setText("Autor");
-            titelTxt.setText("Titel");
-            spKategorie.setSelection(0);
-            if (cbSerie.isChecked()) {
-                cbSerie.setChecked(false);
+        this.autorlist.setText("");
+        this.titelTxt.setText("");
+        this.spKategorie.setSelection(0);
+        if (this.cbSerie.isChecked()) {
+            this.cbSerie.setChecked(false);
             }
-            serieTxt.setText("Reihe");
-            serieNmb.setText("Nummer");
-            serieID = null;
-            autorID = null;
-            bewertung.setRating(0);
-
-        }
-
-    }
-
-    private class updateLeseliste extends AsyncTask<Void, Void, ResultSet>{
-
-        @Override
-        protected ResultSet doInBackground(Void... params) {
-            ResultSet rsa;
-            rsa = null;
-            DBVerbindung dv = new DBVerbindung();
-            dv.oeffneDB();
-            String vname="", nname="",vorname="", nachname="";
-            String serientitel;
-            String insert,delete;
-            insert="";
-            serientitel = serieID;
-            //ul.updateLeseliste(isbn,titelTxt.getText().t2oString(),autorID, kategorieID, seriegelesen,serieID, serieNmb.getText().toString(),(int)bewertung.getRating()*2);
-            if (serieID.toString().equals("Reihentitel")){
-                serieID = "keine";
-                serientitel = "";
-            }
-            else{
-                rsa = dv.lesen("Select serienID from serie where serientitel like '"+serieID+"';");
-                try {
-                    if (rsa.next()){
-                        try {
-                            serieID = rsa.getString(1).toString();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-
-
-                    }
-                    else {
-                        String serie[] =  serieID.split(" ");
-                        Integer serien = serie.length -1;
-                        serieID = serie[0];
-                        if (serien<1 && serieID.length()>6){
-                            serieID = serieID.substring(0,6);
-                        }
-                        else {
-                            for (Integer i = 1; i < serien; i++) {
-                                if (serie[i].length() > serieID.length()){
-                                    serieID= serie[1];
-                                }
-                            }
-                            if (serieID.length() > 6){serieID=serieID.substring(0,6);}
-
-                        }
-                        rsa = dv.lesen("Select serienID, Count(*) from serie where serientitel = '"+serieID+"';");
-                        if (rsa.next()){
-
-                        }
-                        else{
-                            serieID = countserie.toString();
-                        }
-                    }
-
-
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                    }
-
-
-
-
-                if (serieID !="keine") {
-                    Log.i("aender", "INSERT INTO serie Values ('" + serieID + "','" + serientitel + "','');");
-                    dv.aendern("INSERT INTO serie Values ('" + serieID + "','" + serientitel + "','"+11+"');");
-                }
-            }
-            rsa = dv.lesen("Select idAutoren, Concat(vorname, nachname) as name from autoren where CONCAT(vorname, ' ', nachname) like '"+autorID+"';");
-            try {
-                if (!rsa.next()){
-                    String name[] =  autorID.split(" ");
-                    Integer names = name.length -1;
-                    vorname = name[0];
-                    nachname="";
-                    for (Integer i=1;i <= names;i++){
-                        nachname = nachname + name[i];
-                    }
-                    vname= name[0];
-                    nname = name[names];
-                    if (nname.length() > 4){
-                        nname = nname.substring(0,4);
-                    }
-                    if (vname.length() > 3){
-                        vname = vname.substring(0,3);
-                    }
-                    autorID = nname + vname;
-                    if (autorID != "Auto") {
-                        dv.aendern("INSERT INTO autoren Values('" + autorID + "','" + vorname + "','" + nachname + "');");
-                    }
-                }
-                else {
-                    try {
-                            autorID = rsa.getString(1).toString();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            Log.i("lesen", "Select kategorieID From kategorie Where name = '"+kategorieID+"' or kategorieID ='"+kategorieID+"';");
-            rsa = dv.lesen("Select kategorieID From kategorie Where name = '"+kategorieID+"' or kategorieID ='"+kategorieID+"';");
-            try{
-                while (rsa.next()){
-                    kategorieID = rsa.getString(1);
-                }
-            } catch (SQLException e){
-                e.printStackTrace();
-            }
-
-            if (tableadd == "neue_bücher"){
-
-
-                insert="Insert into neue_bücher Values('"+isbn+"','"+titel+"','"+autorID+"',"+seriegelesen+",'"+serieID+"','"+seriennr+"','"+kategorieID+"','');";
-                Log.i("insert", insert);
-            }
-            else if (tableadd == "bücher_gelesen"){
-                insert="Insert into bücher_gelesen Values('"+isbn+"','"+titel+"','"+autorID+"',"+seriegelesen+",'"+serieID+"','"+seriennr+"','"+kategorieID+"',"+bewert+",''"+",'');";
-            }
-
-            Log.i("SQLBefehl", insert);
-            dv.aendern(insert);
-            if (schongelesen == true){
-                delete="Delete from neue_bücher Where isbn='"+isbn+"';";
-                dv.aendern(delete);
-            }
-
-
-            return rsa;
-        }
-        @Override
-        protected void onPostExecute(ResultSet result) {
-
-            AlertDialog.Builder myAlert2 = new AlertDialog.Builder(MainActivity.this);
-            myAlert2.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            myAlert2.setMessage("Buch erfolgreich hinzugefügt").create();
-            AlertDialog alert = myAlert2.create();
-
-            alert.show();
-
-
-            new reset().resetFields();
-        }
-
+        this.serieTxt.setText("");
+        this.serieNmb.setText("");
+        this.serieID = null;
+        this.autorID = null;
+        this.bewertung.setRating(0);
 
         }
 
