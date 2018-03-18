@@ -179,6 +179,7 @@
         android:layout_toEndOf="@+id/serienreihe"
         android:layout_toRightOf="@+id/serienreihe"
         android:background="@android:color/holo_red_dark"
+        android:clickable="true"
         android:visibility="visible"
         app:srcCompat="@android:drawable/ic_menu_delete" />
 

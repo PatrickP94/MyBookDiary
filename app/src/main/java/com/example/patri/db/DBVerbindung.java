@@ -26,8 +26,8 @@ public class DBVerbindung {
 		 auth = FirebaseAuth.getInstance();
 		 user = auth.getCurrentUser().getEmail();
 		 switch (user) {
-			 case "pattyp18@arcor.de":
-				 table = "bücher";
+             case "patrickpreiss94@gmail.com":
+                 table = "bücher";
 				 break;
 			 case "katrinpreiss99@gmail.com":
 				 table = "katrin_books";

@@ -1,11 +1,14 @@
 package com.example.patri.select;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
@@ -42,9 +45,13 @@ public class readDB extends Activity {
     private MainActivity ma = new MainActivity();
     private Boolean verbindungok;
     private DataBaseHelper mDatabase;
+    private ProgressDialog progressBar1;
+    private String buchtext;
+    private Intent shareIntent;
+    private ShareActionProvider sAP;
 
 
-    public void readDB(String isbn, TextView autorlist, TextView titelTxt, RatingBar bewertung, String autorID, Spinner spKategorie, String kategorieID, String serieID, TextView serieNmb, CheckBox cbSerie, AutoCompleteTextView serieTxt, Button newwishlist, Button neugelesen, Context context, DataBaseHelper dbh, ImageButton delete, Boolean verbindungok) {
+    public void readDB(String isbn, TextView autorlist, TextView titelTxt, RatingBar bewertung, String autorID, Spinner spKategorie, String kategorieID, String serieID, TextView serieNmb, CheckBox cbSerie, AutoCompleteTextView serieTxt, Button newwishlist, Button neugelesen, Context context, DataBaseHelper dbh, ImageButton delete, Boolean verbindungok, ProgressDialog progressbar1, Intent shareIntent, ShareActionProvider sAP) {
         this.isbn = isbn;
         this.autorlist = autorlist;
         this.titelTxt = titelTxt;
@@ -62,6 +69,10 @@ public class readDB extends Activity {
         this.delete = delete;
         this.verbindungok = verbindungok;
         mDatabase = dbh;
+        this.progressBar1 = progressbar1;
+
+        this.shareIntent = shareIntent;
+        this.sAP = sAP;
 
 
     }
@@ -133,7 +144,7 @@ public class readDB extends Activity {
                         serieNmb.setText(result.getString(6).toString());
                     }
                     serieID = result.getString(5);
-
+                    buchtext = result.getString(2).toString() + " von " + result.getString(13).toString() + " " + result.getString(14).toString();
                     Float rating = result.getFloat(8) / 2;
                     bewertung.setRating(rating);
                     schongelesen = result.getString(11).toString().contentEquals("gelesen");
@@ -165,6 +176,18 @@ public class readDB extends Activity {
                     e.printStackTrace();
                 }
             }
+            if (progressBar1 != null) {
+                progressBar1.dismiss();
+            }
+
+            shareIntent.putExtra(Intent.EXTRA_TEXT, "Hallo! Sieh mal was ich für ein tolles Buch gefunden habe: " + buchtext + ". Wäre das nicht auch was für dich");
+            if (sAP != null) {
+                sAP.setShareIntent(shareIntent);
+            } else {
+                String Log_TAG = MainActivity.class.getSimpleName();
+                Log.d(Log_TAG, "Kein ShareActionProvider vorhanden!");
+            }
+
 
         }
 
@@ -257,6 +280,11 @@ public class readDB extends Activity {
                     e.printStackTrace();
                 }
             }
+            if (progressBar1 != null) {
+
+                progressBar1.dismiss();
+            }
+            buchtext = titelTxt.getText() + " von " + autorlist.getText().toString();
 
         }
 
