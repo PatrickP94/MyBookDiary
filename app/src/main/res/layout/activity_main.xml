@@ -183,4 +183,14 @@
         android:visibility="visible"
         app:srcCompat="@android:drawable/ic_menu_delete" />
 
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/scan_isbn"
+        android:layout_toEndOf="@+id/ratingBar1"
+        android:layout_toRightOf="@+id/ratingBar1"
+        app:srcCompat="@drawable/common_full_open_on_phone" />
+
+
 </RelativeLayout>

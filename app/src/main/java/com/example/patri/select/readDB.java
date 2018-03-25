@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -49,9 +50,12 @@ public class readDB extends Activity {
     private String buchtext;
     private Intent shareIntent;
     private ShareActionProvider sAP;
+    private MenuItem shareMenuItem;
 
 
-    public void readDB(String isbn, TextView autorlist, TextView titelTxt, RatingBar bewertung, String autorID, Spinner spKategorie, String kategorieID, String serieID, TextView serieNmb, CheckBox cbSerie, AutoCompleteTextView serieTxt, Button newwishlist, Button neugelesen, Context context, DataBaseHelper dbh, ImageButton delete, Boolean verbindungok, ProgressDialog progressbar1, Intent shareIntent, ShareActionProvider sAP) {
+    public void readDB(String isbn, TextView autorlist, TextView titelTxt, RatingBar bewertung, String autorID, Spinner spKategorie, String kategorieID, String serieID, TextView serieNmb,
+                       CheckBox cbSerie, AutoCompleteTextView serieTxt, Button newwishlist, Button neugelesen, Context context, DataBaseHelper dbh, ImageButton delete, Boolean verbindungok,
+                       ProgressDialog progressbar1, Intent shareIntent, ShareActionProvider sAP, MenuItem shareMenuItem) {
         this.isbn = isbn;
         this.autorlist = autorlist;
         this.titelTxt = titelTxt;
@@ -70,7 +74,7 @@ public class readDB extends Activity {
         this.verbindungok = verbindungok;
         mDatabase = dbh;
         this.progressBar1 = progressbar1;
-
+        this.shareMenuItem = shareMenuItem;
         this.shareIntent = shareIntent;
         this.sAP = sAP;
 
@@ -83,6 +87,7 @@ public class readDB extends Activity {
         } else {
             AsyncTask readDB2 = new readDB2().execute();
         }
+
 
         return schongelesen;
     }
@@ -179,7 +184,7 @@ public class readDB extends Activity {
             if (progressBar1 != null) {
                 progressBar1.dismiss();
             }
-
+            shareMenuItem.setVisible(true);
             shareIntent.putExtra(Intent.EXTRA_TEXT, "Hallo! Sieh mal was ich für ein tolles Buch gefunden habe: " + buchtext + ". Wäre das nicht auch was für dich");
             if (sAP != null) {
                 sAP.setShareIntent(shareIntent);

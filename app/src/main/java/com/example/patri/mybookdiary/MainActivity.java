@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.Spinner;
@@ -78,12 +79,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private MenuItem shareMenuItem;
     private ShareActionProvider sAP;
     private Intent shareIntent;
+    private ImageView picture;
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
         shareMenuItem = menu.findItem(R.id.action_teile_buch);
+        shareMenuItem.setVisible(false);
         sAP = (ShareActionProvider) MenuItemCompat.getActionProvider(shareMenuItem);
         shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -108,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         delete = (ImageButton) findViewById(R.id.delete);
         delete.setOnClickListener(this);
 
+
         cbSerie = (CheckBox) findViewById(R.id.cbSerie);
         dbh = new DataBaseHelper(this);
 
@@ -117,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 if (s.length() == 13) {
                     readDB rdb = new readDB();
-                    rdb.readDB(s.toString(), autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk, null, shareIntent, sAP);
+                    rdb.readDB(s.toString(), autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk, null, shareIntent, sAP, shareMenuItem);
                     rdb.readmyDatabase();
                 }
             }
@@ -126,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() == 13) {
                     readDB rdb = new readDB();
-                    rdb.readDB(s.toString(), autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk, null, shareIntent, sAP);
+                    rdb.readDB(s.toString(), autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk, null, shareIntent, sAP, shareMenuItem);
                     rdb.readmyDatabase();
                 }
             }
@@ -139,15 +144,11 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         cbSerie.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View v)
-            {
-                if (cbSerie.isChecked())
-                {
-                   serieTxt.setVisibility(View.VISIBLE);
-                   serieNmb.setVisibility(View.VISIBLE);
-                }
-                else
-                {
+            public void onClick(View v) {
+                if (cbSerie.isChecked()) {
+                    serieTxt.setVisibility(View.VISIBLE);
+                    serieNmb.setVisibility(View.VISIBLE);
+                } else {
                     serieTxt.setVisibility(View.INVISIBLE);
                     serieNmb.setVisibility(View.INVISIBLE);
                 }
@@ -176,42 +177,42 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
         autorlist =(AutoCompleteTextView)findViewById(R.id.autoren);
 
-            getAutor autorenliste = new getAutor();
-            autor = null;
-            try {
-                autor = autorenliste.autorenlisteAbrufen(dbh);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-            ArrayAdapter<String> adapterAutor = new ArrayAdapter<String>(this,
-                    android.R.layout.simple_dropdown_item_1line, autor);
-            autorlist.setAdapter(adapterAutor);
+        getAutor autorenliste = new getAutor();
+        autor = null;
+        try {
+            autor = autorenliste.autorenlisteAbrufen(dbh);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        ArrayAdapter<String> adapterAutor = new ArrayAdapter<String>(this,
+                android.R.layout.simple_dropdown_item_1line, autor);
+        autorlist.setAdapter(adapterAutor);
 
-            serieTxt = (AutoCompleteTextView) findViewById(R.id.serienreihe);
-            GetSerie gS = new GetSerie();
-            try {
-                serielist = gS.serienlistAbrufen(dbh);
-                countserie =serielist.size()+1;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                serielist = null;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                serielist = null;
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-                serielist = null;
-            }
-            ArrayAdapter<String> adapterserie = new ArrayAdapter<String>(this,
-                    android.R.layout.simple_dropdown_item_1line, serielist);
-            serieTxt.setAdapter(adapterserie);
+        serieTxt = (AutoCompleteTextView) findViewById(R.id.serienreihe);
+        GetSerie gS = new GetSerie();
+        try {
+            serielist = gS.serienlistAbrufen(dbh);
+            countserie = serielist.size() + 1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            serielist = null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            serielist = null;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            serielist = null;
+        }
+        ArrayAdapter<String> adapterserie = new ArrayAdapter<String>(this,
+                android.R.layout.simple_dropdown_item_1line, serielist);
+        serieTxt.setAdapter(adapterserie);
         Spinner dropdown = (Spinner)findViewById(R.id.spKategorie);
         getKategorie gK = new getKategorie();
-       // String[] items = new String[]{"","Biografie", "Komödie", "Comic","Esoterik","Fantasy","Fiction Mashup", "Gegenwartsliteratur", "Historische Romane", "Jugendromane/Schullektüre", "Kriminalroman", "Liebesromane", "Politik", "Psychothriller", "Science Fiction","Thriller"};
+        // String[] items = new String[]{"","Biografie", "Komödie", "Comic","Esoterik","Fantasy","Fiction Mashup", "Gegenwartsliteratur", "Historische Romane", "Jugendromane/Schullektüre", "Kriminalroman", "Liebesromane", "Politik", "Psychothriller", "Science Fiction","Thriller"};
         kategorielist =null;
         try {
             kategorielist = gK.kategorieListeabrufen(dbh);
@@ -250,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         bewertung.setVisibility(View.VISIBLE);
         if (v.getId() == R.id.scan_button) {
             resetFields();
-            schongelesen=false;
+            schongelesen = false;
             IntentIntegrator scanIntegrator = new IntentIntegrator(this);
             scanIntegrator.initiateScan();
             bewertung.setVisibility(View.VISIBLE);
@@ -258,21 +259,26 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
         if (v.getId() == R.id.neu_gelesen) {
             updateLeseliste ul = new updateLeseliste();
-            if (cbSerie.isChecked()){ seriegelesen = 1;}
-            else{ seriegelesen =0; }
+            if (cbSerie.isChecked()) {
+                seriegelesen = 1;
+            } else {
+                seriegelesen = 0;
+            }
             titel = titelTxt.getText().toString();
             seriennr = serieNmb.getText().toString();
-            if (seriennr.equals("Nummer")){ seriennr = ""; }
+            if (seriennr.equals("Nummer")) {
+                seriennr = "";
+            }
             if (serieID == null && serieTxt.getText().toString() != "Reihentitel" || serieTxt.getText().toString() == "") {
                 serieID = serieTxt.getText().toString();
             }
-            if (autorID ==null){
+            if (autorID == null) {
                 autorID = autorlist.getText().toString();
             }
             float bewert1 = bewertung.getRating() * 2;
             bewert = Math.round(bewert1);
             tableadd = "bücher_gelesen";
-            if (kategorieID ==null){
+            if (kategorieID == null) {
                 kategorieID = spKategorie.getItemAtPosition(spKategorie.getSelectedItemPosition()).toString();
             }
             try {
@@ -289,15 +295,20 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
         if (v.getId() == R.id.neuwishlist){
             updateLeseliste ul = new updateLeseliste();
-            if (cbSerie.isChecked()){ seriegelesen = 1;}
-            else{ seriegelesen =0; }
+            if (cbSerie.isChecked()) {
+                seriegelesen = 1;
+            } else {
+                seriegelesen = 0;
+            }
             titel = titelTxt.getText().toString();
             seriennr = serieNmb.getText().toString();
-            if (seriennr.equals("Nummer")){ seriennr = ""; }
+            if (seriennr.equals("Nummer")) {
+                seriennr = "";
+            }
             float bewert1 = bewertung.getRating() * 2;
             bewert = Math.round(bewert1);
             //autorID = autorTxt.getText().toString();
-            if (autorID ==null){
+            if (autorID == null) {
                 autorID = autorlist.getText().toString();
             }
             if (serieID == null && serieTxt.getText().toString() != "Reihentitel" || serieTxt.getText().toString() == "") {
@@ -306,9 +317,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
 
             tableadd = "neue_bücher";
-            if (kategorieID ==null){
+            if (kategorieID == null) {
                 kategorieID = spKategorie.getItemAtPosition(spKategorie.getSelectedItemPosition()).toString();
-            }
+        }
             try {
                 erfolg = ul.updateLeseliste(serieID, autorID, kategorieID, tableadd, isbn, titel, bewert, seriennr, countserie, seriegelesen, schongelesen, MainActivity.this, dbh, verbindungOk);
             } catch (ExecutionException e) {
@@ -329,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
+        }
         }
     }
 
@@ -339,8 +350,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             String scanContent = scanningResult.getContents();
             String scanFormat = scanningResult.getFormatName();
             isbnTxt.setText(scanContent);
-            isbn=scanContent;
-                //new readDB().execute();
+            isbn = scanContent;
+            //new readDB().execute();
             progressBar1 = new ProgressDialog(this);
             progressBar1.setCancelable(true);
             progressBar1.setMessage("Lade Daten...");
@@ -348,14 +359,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             progressBar1.show();
 
 
-                readDB rdb = new readDB();
-            rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk, progressBar1, shareIntent, sAP);
+            readDB rdb = new readDB();
+            rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk, progressBar1, shareIntent, sAP, shareMenuItem);
                 rdb.readmyDatabase();
             Intent empfaengerIntent = this.getIntent();
             if (empfaengerIntent != null && empfaengerIntent.hasExtra(Intent.EXTRA_TEXT)) {
                 buch = empfaengerIntent.getStringExtra(Intent.EXTRA_TEXT);
             }
-
 
             //progressBar1.dismiss();
         }
@@ -438,7 +448,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         serieTxt = (AutoCompleteTextView) findViewById(R.id.serienreihe);
 
                         readDB rdb = new readDB();
-                        rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk, null, shareIntent, sAP);
+                        rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk, null, shareIntent, sAP, shareMenuItem);
                         rdb.readmyDatabase();
 
                     }
@@ -532,7 +542,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         });
                         serieTxt = (AutoCompleteTextView) findViewById(R.id.serienreihe);
                         readDB rdb = new readDB();
-                        rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk, null, shareIntent, sAP);
+                        rdb.readDB(isbn, autorlist, titelTxt, bewertung, autorID, spKategorie, kategorieID, serieID, serieNmb, cbSerie, serieTxt, newwishlist, neugelesen, MainActivity.this, dbh, delete, verbindungOk, null, shareIntent, sAP, shareMenuItem);
                         rdb.readmyDatabase();
                     }
                 });
@@ -612,5 +622,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         }
 
+
 }
+
+
 

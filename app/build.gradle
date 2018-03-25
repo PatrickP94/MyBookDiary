@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
+
 android {
     compileSdkVersion 25
     buildToolsVersion "26.0.0"
@@ -27,12 +27,17 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    compile files('src/main/java/libs/jsoup-1.10.3.jar')
+    compile files('src/main/java/libs/mysql-connector-java-5.1.7-bin.jar')
+    compile files('libs/sqlite-jdbc-3.19.3.jar')
+    compile 'com.github.bumptech.glide:glide:3.8.0'
+
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.google.android.gms:play-services-auth:9.0.0'
+    compile 'com.google.firebase:firebase-core:10.2.0'
+    compile 'com.google.firebase:firebase-auth:10.2.0'
+    compile 'com.google.firebase:firebase-storage:10.2.0'
     testCompile 'junit:junit:4.12'
-    compile files('src/main/java/libs/jsoup-1.10.3.jar')
-    compile files('src/main/java/libs/mysql-connector-java-5.1.7-bin.jar')
-    compile 'com.google.firebase:firebase-auth:9.2.1'
-    compile files('libs/sqlite-jdbc-3.19.3.jar')
 }
+apply plugin: 'com.google.gms.google-services'
